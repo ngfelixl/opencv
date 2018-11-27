@@ -59,6 +59,7 @@ export class AppComponent implements AfterViewInit {
           this.video.onloadedmetadata = (e) => {
             this.task = 'Metadata loaded. Play video';
             (<any>this.video).play();
+            this.task = 'Video playing';
             this.src = new cv.Mat(this.video.height, this.video.width, cv.CV_8UC4);
             this.dst = new cv.Mat(this.video.height, this.video.width, cv.CV_8UC4);
             this.canvas.nativeElement.getContext('2d').getImageData(0, 0, this.video.width, this.video.height);
