@@ -47,6 +47,8 @@ export class AppComponent implements AfterViewInit {
       this.classifierReady = this.classifier.load('haarcascade_frontalface_default');
       if (!this.classifierReady) {
         this.error = `Couldn't load classifier`;
+      } else {
+        this.task = 'Successfully loaded classifier';
       }
     });
   }
@@ -126,7 +128,7 @@ export class AppComponent implements AfterViewInit {
         const face = this.faces.get(i);
         const point1 = new cv.Point(face.x, face.y);
         const point2 = new cv.Point(face.x + face.width, face.y + face.height);
-        cv.rectangle(this.dst, point1, point2, [255, 0, 0, 255]);
+        cv.rectangle(this.dst, point1, point2, [0, 255, 0, 255], 3);
       }
       cv.imshow(this.canvas.nativeElement, this.dst);
       // schedule the next one.
