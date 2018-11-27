@@ -26,8 +26,8 @@
               "src/styles.css"
             ],
             "scripts": [],
-            "baseHref": "./opencv/",
-            "deployUrl": "https://ngfelixl.github.io/"
+            "baseHref": "./",
+            "deployUrl": "https://ngfelixl.github.io/opencv/"
           },
           "configurations": {
             "production": {
