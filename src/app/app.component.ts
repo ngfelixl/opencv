@@ -122,13 +122,13 @@ export class AppComponent implements AfterViewInit {
       this.src.copyTo(this.dst);
       cv.cvtColor(this.dst, this.gray, cv.COLOR_RGBA2GRAY, 0);
       // detect faces.
-      // this.classifier.detectMultiScale(this.gray, this.faces, 1.1, 3, 0);
+      this.classifier.detectMultiScale(this.gray, this.faces, 1.1, 3, 0);
       // draw faces.
       for (let i = 0; i < this.faces.size(); ++i) {
-          const face = this.faces.get(i);
-          const point1 = new cv.Point(face.x, face.y);
-          const point2 = new cv.Point(face.x + face.width, face.y + face.height);
-          cv.rectangle(this.dst, point1, point2, [255, 0, 0, 255]);
+        const face = this.faces.get(i);
+        const point1 = new cv.Point(face.x, face.y);
+        const point2 = new cv.Point(face.x + face.width, face.y + face.height);
+        cv.rectangle(this.dst, point1, point2, [255, 0, 0, 255]);
       }
       cv.imshow(this.canvas.nativeElement, this.dst);
       // schedule the next one.
