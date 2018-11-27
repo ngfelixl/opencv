@@ -23,6 +23,7 @@ export class AppComponent implements AfterViewInit {
   private stream: MediaStream;
   @ViewChild('canvasOutput') canvas: ElementRef;
   context: CanvasRenderingContext2D;
+  counter = 0;
 
 
   private constraints = {
@@ -129,11 +130,15 @@ export class AppComponent implements AfterViewInit {
           const point2 = new cv.Point(face.x + face.width, face.y + face.height);
           cv.rectangle(this.dst, point1, point2, [255, 0, 0, 255]);
       }
-      this.task = 'Draw image';
       cv.imshow(this.canvas.nativeElement, this.dst);
       // schedule the next one.
       const delay = 1000 / this.fps - (Date.now() - begin);
-      setTimeout(this.processVideo, delay);
+
+      this.task = `Draw image ${this.counter}`;
+      this.counter++;
+      setTimeout(() => {
+        this.processVideo();
+      }, delay);
     } catch (err) {
       this.error = err;
     }
