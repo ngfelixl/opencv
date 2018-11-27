@@ -41,7 +41,8 @@ export class AppComponent implements AfterViewInit {
     this.task = 'OpenCV Ready. Load classifier.';
     this.opencvReady = true;
     this.classifier = new cv.CascadeClassifier();
-    this.classifier.load('haarcascade_frontalface_default.xml');
+    // this.classifier.load('haarcascade_frontalface_default.xml');
+    this.classifier.load('./assets/haarcascade_frontalface_default.xml');
   }
 
   toggleStream() {
