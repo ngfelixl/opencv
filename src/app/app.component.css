@@ -4,3 +4,17 @@
 video, canvas { width: 100%; }
 
 .flex { flex: 1; }
+
+.footer {
+  width: 100%;
+  padding: 12px;
+  box-sizing: border-box;
+}
+
+.err {
+  background-color: red;
+  color: white;
+  padding: 8px;
+  border-radius: 4px;
+  box-sizing: border-box;
+}

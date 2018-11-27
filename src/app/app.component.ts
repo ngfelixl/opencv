@@ -1,4 +1,5 @@
 import { Component, HostListener, AfterViewInit } from '@angular/core';
+
 declare var cv: any;
 
 @Component({
@@ -9,18 +10,24 @@ declare var cv: any;
 export class AppComponent implements AfterViewInit {
   opencvReady = false;
   streaming = false;
-  src: any;
-  dst: any;
-  gray: any;
-  cap: any;
-  faces: any;
-  classifier: any;
-  video: HTMLElement;
-  fps = 1;
-  stream: MediaStream;
+  error: string;
+  private src: any;
+  private dst: any;
+  private gray: any;
+  private cap: any;
+  private faces: any;
+  private classifier: any;
+  private video: HTMLVideoElement;
+  private fps = 1;
+  private stream: MediaStream;
+
+  private constraints = {
+    audio: false,
+    video: true
+  };
 
   ngAfterViewInit() {
-    this.video = document.getElementById('videoInput');
+    this.video = document.getElementById('videoInput') as HTMLVideoElement;
   }
 
   @HostListener('window:opencv-loaded', ['$event'])
@@ -29,17 +36,13 @@ export class AppComponent implements AfterViewInit {
   }
 
   toggleStream() {
+    this.error = '';
     this.streaming = !this.streaming;
 
     if (this.streaming) {
-      const constraints = {
-        audio: false,
-        video: true
-      };
-      navigator.mediaDevices.getUserMedia(constraints)
+      navigator.mediaDevices.getUserMedia(this.constraints)
         .then((stream: MediaStream) => {
           this.stream = stream;
-          this.streaming = true;
           this.gray = new cv.Mat();
           this.faces = new cv.RectVector();
           this.classifier = new cv.CascadeClassifier();
@@ -50,13 +53,14 @@ export class AppComponent implements AfterViewInit {
           // schedule the first one.
           this.video.onloadedmetadata = (e) => {
             (<any>this.video).play();
-            this.src = new cv.Mat(this.video.clientHeight, this.video.clientWidth, cv.CV_8UC4);
-            this.dst = new cv.Mat(this.video.clientHeight, this.video.clientWidth, cv.CV_8UC4);
+            this.src = new cv.Mat(this.video.height, this.video.width, cv.CV_8UC4);
+            this.dst = new cv.Mat(this.video.height, this.video.width, cv.CV_8UC4);
             this.cap = new cv.VideoCapture(this.video);
             setTimeout(this.processVideo, 0);
           };
         })
         .catch(() => {
+          this.error = 'Error while catching webcam';
           this.streaming = false;
         });
     } else {
@@ -71,11 +75,11 @@ export class AppComponent implements AfterViewInit {
     try {
       if (!this.streaming) {
         // clean and stop.
-        this.src.delete();
-        this.dst.delete();
-        this.gray.delete();
-        this.faces.delete();
-        this.classifier.delete();
+        if (this.src) { this.src.delete(); }
+        if (this.dst) { this.dst.delete(); }
+        if (this.gray) { this.gray.delete(); }
+        if (this.faces) { this.faces.delete(); }
+        if (this.classifier) { this.classifier.delete(); }
         return;
       }
       const begin = Date.now();
@@ -92,6 +96,7 @@ export class AppComponent implements AfterViewInit {
           const point2 = new cv.Point(face.x + face.width, face.y + face.height);
           cv.rectangle(this.dst, point1, point2, [255, 0, 0, 255]);
       }
+      console.log('Draw image');
       cv.imshow('canvasOutput', this.dst);
       // schedule the next one.
       const delay = 1000 / this.fps - (Date.now() - begin);
