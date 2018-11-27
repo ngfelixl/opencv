@@ -19,7 +19,7 @@ export class AppComponent implements AfterViewInit {
   private faces: any;
   private classifier: any;
   private video: HTMLVideoElement;
-  private fps = 1;
+  private fps = 30;
   private stream: MediaStream;
   @ViewChild('canvasOutput') canvas: ElementRef;
   context: CanvasRenderingContext2D;
@@ -121,7 +121,6 @@ export class AppComponent implements AfterViewInit {
       this.src.copyTo(this.dst);
       cv.cvtColor(this.dst, this.gray, cv.COLOR_RGBA2GRAY, 0);
       // detect faces.
-      this.task = 'Process video 1';
       // this.classifier.detectMultiScale(this.gray, this.faces, 1.1, 3, 0);
       // draw faces.
       for (let i = 0; i < this.faces.size(); ++i) {
