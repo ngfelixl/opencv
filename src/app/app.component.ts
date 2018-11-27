@@ -1,4 +1,4 @@
-import { Component, HostListener, ElementRef } from '@angular/core';
+import { Component, HostListener, AfterViewInit } from '@angular/core';
 declare var cv: any;
 
 @Component({
@@ -6,7 +6,8 @@ declare var cv: any;
   templateUrl: './app.component.html',
   styleUrls: ['./app.component.css']
 })
-export class AppComponent {
+export class AppComponent implements AfterViewInit {
+  opencvReady = false;
   streaming = true;
   src: any;
   dst: any;
@@ -15,41 +16,50 @@ export class AppComponent {
   faces: any;
   classifier: any;
   video: HTMLElement;
-  fps = 30;
+  fps = 1;
+
+  ngAfterViewInit() {
+    this.video = document.getElementById('videoInput');
+  }
 
   @HostListener('window:opencv-loaded', ['$event'])
   runOpenCV() {
-    console.log('OpenCV loaded');
-    this.video = document.getElementById('videoInput');
-    console.log(this.src);
+    this.opencvReady = true;
+  }
 
-    const constraints = {
-      audio: false,
-      video: true
-    };
-    navigator.mediaDevices.getUserMedia(constraints)
-      .then((stream) => {
-        this.streaming = true;
-        this.gray = new cv.Mat();
-        this.faces = new cv.RectVector();
-        this.classifier = new cv.CascadeClassifier();
-        (<any>this.video).srcObject = stream;
-        // load pre-trained classifiers
-        this.classifier.load('./assets/haarcascade_frontalface_default.xml');
+  toggleStream() {
+    this.streaming = !this.streaming;
 
-        // schedule the first one.
-        this.video.onloadedmetadata = (e) => {
-          (<any>this.video).play();
-          this.src = new cv.Mat(this.video.clientHeight, this.video.clientWidth, cv.CV_8UC4);
-          this.dst = new cv.Mat(this.video.clientHeight, this.video.clientWidth, cv.CV_8UC4);
-          this.cap = new cv.VideoCapture(this.video);
-          setTimeout(this.processVideo, 0);
-        };
-      })
-      .catch(() => {
-        this.streaming = false;
-      });
+    if (this.streaming) {
+      const constraints = {
+        audio: false,
+        video: true
+      };
+      navigator.mediaDevices.getUserMedia(constraints)
+        .then((stream) => {
+          this.streaming = true;
+          this.gray = new cv.Mat();
+          this.faces = new cv.RectVector();
+          this.classifier = new cv.CascadeClassifier();
+          (<any>this.video).srcObject = stream;
+          // load pre-trained classifiers
+          this.classifier.load('./assets/haarcascade_frontalface_default.xml');
 
+          // schedule the first one.
+          this.video.onloadedmetadata = (e) => {
+            (<any>this.video).play();
+            this.src = new cv.Mat(this.video.clientHeight, this.video.clientWidth, cv.CV_8UC4);
+            this.dst = new cv.Mat(this.video.clientHeight, this.video.clientWidth, cv.CV_8UC4);
+            this.cap = new cv.VideoCapture(this.video);
+            setTimeout(this.processVideo, 0);
+          };
+        })
+        .catch(() => {
+          this.streaming = false;
+        });
+    } else {
+      (<any>this.video).stop();
+    }
   }
 
 

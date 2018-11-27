@@ -1,4 +1,6 @@
 <!--The content below is only a placeholder and can be replaced.-->
 
+<span>{{opencvReady ? 'OpenCV Ready' : 'OpenCV loading'}}</span>
+<button mat-flat-button [disabled]="!opencvReady" (click)="toggleStream()">{{streaming ? 'Stop' : 'Start'}}</button>
 <video id="videoInput"></video>
 <canvas id="canvasOutput"></canvas>
