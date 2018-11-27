@@ -60,15 +60,16 @@ export class AppComponent implements AfterViewInit {
             this.src = new cv.Mat(this.video.height, this.video.width, cv.CV_8UC4);
             this.dst = new cv.Mat(this.video.height, this.video.width, cv.CV_8UC4);
             this.cap = new cv.VideoCapture(this.video);
-            setTimeout(this.processVideo, 0);
+            this.processVideo();
           };
         })
-        .catch(() => {
-          this.error = 'Error while catching webcam';
+        .catch((error) => {
+          this.error = error;
           this.streaming = false;
         });
     } else {
       if (this.stream) {
+        this.task = 'Stopping';
         this.stream.getTracks().forEach(track => track.stop());
       }
     }
@@ -77,6 +78,7 @@ export class AppComponent implements AfterViewInit {
 
   processVideo() {
     try {
+      this.task = 'Process video';
       if (!this.streaming) {
         this.task = 'Stop streaming. Delete vars.';
         // clean and stop.
