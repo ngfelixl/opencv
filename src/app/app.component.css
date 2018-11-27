@@ -1,2 +1,6 @@
 :host { width: 100%; }
-:host > * { width: 50%; border: 1px solid black; box-sizing: border-box; }
+.content { width: 100%; display: flex; flex-wrap: wrap; }
+.content > div { flex: 1 1 250px; border: 1px solid black; margin: 8px; }
+video, canvas { width: 100%; }
+
+.flex { flex: 1; }

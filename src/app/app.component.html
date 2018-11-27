@@ -1,6 +1,11 @@
 <!--The content below is only a placeholder and can be replaced.-->
 
-<span>{{opencvReady ? 'OpenCV Ready' : 'OpenCV loading'}}</span>
-<button mat-flat-button [disabled]="!opencvReady" (click)="toggleStream()">{{streaming ? 'Stop' : 'Start'}}</button>
-<video id="videoInput"></video>
-<canvas id="canvasOutput"></canvas>
+<mat-toolbar>
+  <span>{{opencvReady ? 'OpenCV Ready' : 'OpenCV loading'}}</span>
+  <span class="flex"></span>
+  <button mat-flat-button [disabled]="!opencvReady" (click)="toggleStream()">{{streaming ? 'Stop' : 'Start'}}</button>
+</mat-toolbar>
+<div class="content">
+  <div><video id="videoInput"></video></div>
+  <div><canvas id="canvasOutput"></canvas></div>
+</div>

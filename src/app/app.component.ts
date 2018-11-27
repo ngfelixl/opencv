@@ -17,6 +17,7 @@ export class AppComponent implements AfterViewInit {
   classifier: any;
   video: HTMLElement;
   fps = 1;
+  stream: MediaStream;
 
   ngAfterViewInit() {
     this.video = document.getElementById('videoInput');
@@ -36,7 +37,8 @@ export class AppComponent implements AfterViewInit {
         video: true
       };
       navigator.mediaDevices.getUserMedia(constraints)
-        .then((stream) => {
+        .then((stream: MediaStream) => {
+          this.stream = stream;
           this.streaming = true;
           this.gray = new cv.Mat();
           this.faces = new cv.RectVector();
@@ -58,7 +60,9 @@ export class AppComponent implements AfterViewInit {
           this.streaming = false;
         });
     } else {
-      (<any>this.video).stop();
+      if (this.stream) {
+        this.stream.getTracks().forEach(track => track.stop());
+      }
     }
   }
 
