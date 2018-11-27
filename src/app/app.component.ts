@@ -8,7 +8,7 @@ declare var cv: any;
 })
 export class AppComponent implements AfterViewInit {
   opencvReady = false;
-  streaming = true;
+  streaming = false;
   src: any;
   dst: any;
   gray: any;
