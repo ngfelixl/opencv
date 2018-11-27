@@ -21,7 +21,8 @@ export class AppComponent implements AfterViewInit {
   private video: HTMLVideoElement;
   private fps = 1;
   private stream: MediaStream;
-  @ViewChild('canvas') canvas: ElementRef;
+  @ViewChild('canvasOutput') canvas: ElementRef;
+  context: CanvasRenderingContext2D;
 
 
   private constraints = {
@@ -31,6 +32,7 @@ export class AppComponent implements AfterViewInit {
 
   ngAfterViewInit() {
     this.video = document.getElementById('videoInput') as HTMLVideoElement;
+    this.context = (<HTMLCanvasElement>this.canvas.nativeElement).getContext('2d');
   }
 
   @HostListener('window:opencv-loaded', ['$event'])
@@ -59,10 +61,26 @@ export class AppComponent implements AfterViewInit {
           this.video.onloadedmetadata = (e) => {
             this.task = 'Metadata loaded. Play video';
             (<any>this.video).play();
-            this.src = new cv.Mat(this.video.height, this.video.width, cv.CV_8UC4);
-            this.dst = new cv.Mat(this.video.height, this.video.width, cv.CV_8UC4);
-            // this.canvas.nativeElement.getContext('2d').getImageData(0, 0, this.video.width, this.video.height);
+            const height = this.video.videoHeight;
+            const width = this.video.videoWidth;
+            // const height = this.video.clientHeight;
+            // const width = this.video.clientWidth;
+            // const height = this.video.height;
+            // const width = this.video.width;
+            this.video.height = height;
+            this.video.width = width;
+            console.log(width, height);
+
+            this.src = new cv.Mat(height, width, cv.CV_8UC4);
+            this.dst = new cv.Mat(height, width, cv.CV_8UC4);
+            // this.context.getImageData(0, 0, width, height);
+
             this.cap = new cv.VideoCapture(this.video);
+            // console.log(this.video.height, this.video.width);
+            // this.context.putImageData
+
+            // this.context.canvas.width = this.video.width;
+            // this.context.canvas.height = this.video.height;
             this.task = 'Video playing. Setup canvas. Create matrices.';
             this.processVideo();
           };
@@ -81,6 +99,7 @@ export class AppComponent implements AfterViewInit {
 
 
   processVideo() {
+    this.task = 'Try processing video';
     try {
       this.task = 'Process video';
       if (!this.streaming) {
