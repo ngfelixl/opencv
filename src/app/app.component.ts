@@ -20,13 +20,7 @@ export class AppComponent {
   @HostListener('window:opencv-loaded', ['$event'])
   runOpenCV() {
     console.log('OpenCV loaded');
-    this.video = document.querySelector('video');
-    this.src = new cv.Mat(this.video.clientHeight, this.video.clientWidth, cv.CV_8UC4);
-    this.dst = new cv.Mat(this.video.clientHeight, this.video.clientWidth, cv.CV_8UC4);
-    this.gray = new cv.Mat();
-    this.cap = new cv.VideoCapture(this.video);
-    this.faces = new cv.RectVector();
-    this.classifier = new cv.CascadeClassifier();
+    this.video = document.getElementById('videoInput');
     console.log(this.src);
 
     const constraints = {
@@ -36,17 +30,26 @@ export class AppComponent {
     navigator.mediaDevices.getUserMedia(constraints)
       .then((stream) => {
         this.streaming = true;
+        this.src = new cv.Mat(this.video.clientHeight, this.video.clientWidth, cv.CV_8UC4);
+        this.dst = new cv.Mat(this.video.clientHeight, this.video.clientWidth, cv.CV_8UC4);
+        this.gray = new cv.Mat();
+        this.cap = new cv.VideoCapture(this.video);
+        this.faces = new cv.RectVector();
+        this.classifier = new cv.CascadeClassifier();
         (<any>this.video).srcObject = stream;
+        // load pre-trained classifiers
+        this.classifier.load('./assets/haarcascade_frontalface_default.xml');
+
+        // schedule the first one.
+        setTimeout(this.processVideo, 0);
+        this.video.onloadedmetadata = (e) => {
+          (<any>this.video).play();
+        };
       })
       .catch(() => {
         this.streaming = false;
       });
 
-    // load pre-trained classifiers
-    this.classifier.load('./assets/haarcascade_frontalface_default.xml');
-
-    // schedule the first one.
-    setTimeout(this.processVideo, 0);
   }
 
 
