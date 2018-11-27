@@ -1,5 +1,4 @@
 import { Component, HostListener, AfterViewInit, ElementRef, ViewChild } from '@angular/core';
-
 declare var cv: any;
 
 @Component({
@@ -9,8 +8,10 @@ declare var cv: any;
 })
 export class AppComponent implements AfterViewInit {
   opencvReady = false;
+  classifierReady = false;
   streaming = false;
   error: string;
+  warning: string;
   task = 'Loading OpenCV';
   private src: any;
   private dst: any;
@@ -41,15 +42,20 @@ export class AppComponent implements AfterViewInit {
     this.task = 'OpenCV Ready. Load classifier.';
     this.opencvReady = true;
     this.classifier = new cv.CascadeClassifier();
-    // this.classifier.load('haarcascade_frontalface_default.xml');
-    this.classifier.load('./assets/haarcascade_frontalface_default.xml');
+
+    this.createFileFromUrl('haarcascade_frontalface_default', './assets/haarcascade_frontalface_default.xml', () => {
+      this.classifierReady = this.classifier.load('haarcascade_frontalface_default');
+      if (!this.classifierReady) {
+        this.error = `Couldn't load classifier`;
+      }
+    });
   }
 
   toggleStream() {
-    this.error = '';
     this.streaming = !this.streaming;
 
     if (this.streaming) {
+      this.error = '';
       this.task = 'Request media device';
       navigator.mediaDevices.getUserMedia(this.constraints)
         .then((stream: MediaStream) => {
@@ -57,36 +63,25 @@ export class AppComponent implements AfterViewInit {
           this.stream = stream;
           this.gray = new cv.Mat();
           this.faces = new cv.RectVector();
-          (<any>this.video).srcObject = stream;
+          this.video.srcObject = stream;
 
-          // schedule the first one.
           this.video.onloadedmetadata = (e) => {
             this.task = 'Metadata loaded. Play video';
-            (<any>this.video).play();
+            this.video.play();
             const height = this.video.videoHeight;
             const width = this.video.videoWidth;
-            // const height = this.video.clientHeight;
-            // const width = this.video.clientWidth;
-            // const height = this.video.height;
-            // const width = this.video.width;
-            // this.video.height = height;
+
             const ar = height / width;
             const clientWidth = this.video.clientWidth;
             const clientHeight = ar * this.video.clientWidth;
             this.video.width = clientWidth;
             this.video.height = clientHeight;
-            console.log(this.video.width, this.video.height);
 
             this.src = new cv.Mat(clientHeight, clientWidth, cv.CV_8UC4);
             this.dst = new cv.Mat(clientHeight, clientWidth, cv.CV_8UC4);
-            // this.context.getImageData(0, 0, width, height);
 
             this.cap = new cv.VideoCapture(this.video);
-            // console.log(this.video.height, this.video.width);
-            // this.context.putImageData
 
-            // this.context.canvas.width = this.video.width;
-            // this.context.canvas.height = this.video.height;
             this.task = 'Video playing. Setup canvas. Create matrices.';
             this.processVideo();
           };
@@ -97,7 +92,7 @@ export class AppComponent implements AfterViewInit {
         });
     } else {
       if (this.stream) {
-        this.task = 'Stopping';
+        this.task = 'Stopped';
         this.stream.getTracks().forEach(track => track.stop());
       }
     }
@@ -123,7 +118,9 @@ export class AppComponent implements AfterViewInit {
       this.src.copyTo(this.dst);
       cv.cvtColor(this.dst, this.gray, cv.COLOR_RGBA2GRAY, 0);
       // detect faces.
-      this.classifier.detectMultiScale(this.gray, this.faces, 1.1, 3, 0);
+      if (this.classifierReady) {
+        this.classifier.detectMultiScale(this.gray, this.faces, 1.1, 3, 0);
+      }
       // draw faces.
       for (let i = 0; i < this.faces.size(); ++i) {
         const face = this.faces.get(i);
@@ -143,5 +140,24 @@ export class AppComponent implements AfterViewInit {
     } catch (err) {
       this.error = err;
     }
+  }
+
+
+  createFileFromUrl(path, url, callback) {
+    const request = new XMLHttpRequest();
+    request.open('GET', url, true);
+    request.responseType = 'arraybuffer';
+    request.onload = (ev) => {
+      if (request.readyState === 4) {
+        if (request.status === 200) {
+          const data = new Uint8Array(request.response);
+          cv.FS_createDataFile('/', path, data, true, false, false);
+          callback();
+        } else {
+          this.error = 'Failed to load ' + url + ' status: ' + request.status;
+        }
+      }
+    };
+    request.send();
   }
 }
