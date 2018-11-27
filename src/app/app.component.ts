@@ -1,4 +1,4 @@
-import { Component, HostListener, AfterViewInit } from '@angular/core';
+import { Component, HostListener, AfterViewInit, ElementRef, ViewChild } from '@angular/core';
 
 declare var cv: any;
 
@@ -21,6 +21,8 @@ export class AppComponent implements AfterViewInit {
   private video: HTMLVideoElement;
   private fps = 1;
   private stream: MediaStream;
+  @ViewChild('canvas') canvas: ElementRef;
+
 
   private constraints = {
     audio: false,
@@ -59,6 +61,7 @@ export class AppComponent implements AfterViewInit {
             (<any>this.video).play();
             this.src = new cv.Mat(this.video.height, this.video.width, cv.CV_8UC4);
             this.dst = new cv.Mat(this.video.height, this.video.width, cv.CV_8UC4);
+            this.canvas.nativeElement.getContext('2d').getImageData(0, 0, this.video.width, this.video.height);
             this.cap = new cv.VideoCapture(this.video);
             this.processVideo();
           };
