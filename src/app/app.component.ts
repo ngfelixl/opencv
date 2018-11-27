@@ -40,7 +40,7 @@ export class AppComponent implements AfterViewInit {
     this.task = 'OpenCV Ready. Load classifier.';
     this.opencvReady = true;
     this.classifier = new cv.CascadeClassifier();
-    this.classifier.load('./assets/haarcascade_frontalface_default.xml');
+    this.classifier.load('haarcascade_frontalface_default.xml');
   }
 
   toggleStream() {
@@ -67,12 +67,16 @@ export class AppComponent implements AfterViewInit {
             // const width = this.video.clientWidth;
             // const height = this.video.height;
             // const width = this.video.width;
-            this.video.height = height;
-            this.video.width = width;
-            console.log(width, height);
+            // this.video.height = height;
+            const ar = height / width;
+            const clientWidth = this.video.clientWidth;
+            const clientHeight = ar * this.video.clientWidth;
+            this.video.width = clientWidth;
+            this.video.height = clientHeight;
+            console.log(this.video.width, this.video.height);
 
-            this.src = new cv.Mat(height, width, cv.CV_8UC4);
-            this.dst = new cv.Mat(height, width, cv.CV_8UC4);
+            this.src = new cv.Mat(clientHeight, clientWidth, cv.CV_8UC4);
+            this.dst = new cv.Mat(clientHeight, clientWidth, cv.CV_8UC4);
             // this.context.getImageData(0, 0, width, height);
 
             this.cap = new cv.VideoCapture(this.video);
@@ -117,7 +121,8 @@ export class AppComponent implements AfterViewInit {
       this.src.copyTo(this.dst);
       cv.cvtColor(this.dst, this.gray, cv.COLOR_RGBA2GRAY, 0);
       // detect faces.
-      this.classifier.detectMultiScale(this.gray, this.faces, 1.1, 3, 0);
+      this.task = 'Process video 1';
+      // this.classifier.detectMultiScale(this.gray, this.faces, 1.1, 3, 0);
       // draw faces.
       for (let i = 0; i < this.faces.size(); ++i) {
           const face = this.faces.get(i);
@@ -132,7 +137,6 @@ export class AppComponent implements AfterViewInit {
       setTimeout(this.processVideo, delay);
     } catch (err) {
       this.error = err;
-      console.error(err);
     }
   }
 }
