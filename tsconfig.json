@@ -15,6 +15,14 @@
     "lib": [
       "es2017",
       "dom"
-    ]
+    ],
+    "paths": {
+      "opencvng": [
+        "dist/opencvng"
+      ],
+      "opencvng/*": [
+        "dist/opencvng/*"
+      ]
+    }
   }
 }
