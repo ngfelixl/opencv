@@ -11,6 +11,7 @@ export class AppComponent implements AfterViewInit {
   opencvReady = false;
   streaming = false;
   error: string;
+  task = 'Loading OpenCV';
   private src: any;
   private dst: any;
   private gray: any;
@@ -32,7 +33,10 @@ export class AppComponent implements AfterViewInit {
 
   @HostListener('window:opencv-loaded', ['$event'])
   runOpenCV() {
+    this.task = 'OpenCV Ready. Load classifier.';
     this.opencvReady = true;
+    this.classifier = new cv.CascadeClassifier();
+    this.classifier.load('./assets/haarcascade_frontalface_default.xml');
   }
 
   toggleStream() {
@@ -40,18 +44,18 @@ export class AppComponent implements AfterViewInit {
     this.streaming = !this.streaming;
 
     if (this.streaming) {
+      this.task = 'Request media device';
       navigator.mediaDevices.getUserMedia(this.constraints)
         .then((stream: MediaStream) => {
+          this.task = 'Media device ready';
           this.stream = stream;
           this.gray = new cv.Mat();
           this.faces = new cv.RectVector();
-          this.classifier = new cv.CascadeClassifier();
           (<any>this.video).srcObject = stream;
-          // load pre-trained classifiers
-          this.classifier.load('./assets/haarcascade_frontalface_default.xml');
 
           // schedule the first one.
           this.video.onloadedmetadata = (e) => {
+            this.task = 'Metadata loaded. Play video';
             (<any>this.video).play();
             this.src = new cv.Mat(this.video.height, this.video.width, cv.CV_8UC4);
             this.dst = new cv.Mat(this.video.height, this.video.width, cv.CV_8UC4);
@@ -74,12 +78,12 @@ export class AppComponent implements AfterViewInit {
   processVideo() {
     try {
       if (!this.streaming) {
+        this.task = 'Stop streaming. Delete vars.';
         // clean and stop.
         if (this.src) { this.src.delete(); }
         if (this.dst) { this.dst.delete(); }
         if (this.gray) { this.gray.delete(); }
         if (this.faces) { this.faces.delete(); }
-        if (this.classifier) { this.classifier.delete(); }
         return;
       }
       const begin = Date.now();
@@ -96,12 +100,13 @@ export class AppComponent implements AfterViewInit {
           const point2 = new cv.Point(face.x + face.width, face.y + face.height);
           cv.rectangle(this.dst, point1, point2, [255, 0, 0, 255]);
       }
-      console.log('Draw image');
+      this.task = 'Draw image';
       cv.imshow('canvasOutput', this.dst);
       // schedule the next one.
       const delay = 1000 / this.fps - (Date.now() - begin);
       setTimeout(this.processVideo, delay);
     } catch (err) {
+      this.error = err;
       console.error(err);
     }
   }

@@ -1,7 +1,7 @@
 <!--The content below is only a placeholder and can be replaced.-->
 
 <mat-toolbar>
-  <span>{{opencvReady ? 'OpenCV Ready' : 'OpenCV loading'}}</span>
+  <span>OpenCV {{opencvReady ? 'Ready' : 'loading'}}</span>
   <span class="flex"></span>
   <button mat-flat-button [disabled]="!opencvReady" (click)="toggleStream()">{{streaming ? 'Stop' : 'Start'}}</button>
 </mat-toolbar>
@@ -11,5 +11,6 @@
 </div>
 
 <div class="footer">
+  <div class="task" *ngIf="task">{{task}}</div>
   <div class="err" *ngIf="error">{{error}}</div>
 </div>
